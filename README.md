@@ -1,8 +1,9 @@
+
 # 🎮 Home Assistant - Xbox Abbonamento Sensor / Xbox Subscription Sensor
 
 ## Italiano 🇮🇹
 
-Monitorare la **scadenza dell'abbonamento Xbox** direttamente in Home Assistant, con **notifiche automatiche** alla scadenza!
+Monitorare la **scadenza dell'abbonamento Xbox** direttamente in Home Assistant, con **notifiche automatiche** alla scadenza!  
 Facile, veloce e completamente personalizzabile.
 
 ### 📄 Cosa include
@@ -14,29 +15,70 @@ Facile, veloce e completamente personalizzabile.
 ### 🚀 Come si installa
 
 1. Scarica i file dal pacchetto ZIP.
-2. Copia i file:
-   - `sensors/scadenza_xbox.yaml` nella tua cartella dei sensori (`/config/sensors/`).
-   - `automations/notifica_scadenza_xbox.yaml` nella tua cartella delle automazioni (`/config/automations/`).
-3. Aggiungi i file al tuo `configuration.yaml` usando `!include`.
-4. Riavvia Home Assistant.
+2. Copia il contenuto di `sensors/scadenza_xbox.yaml` **dentro il tuo** `configuration.yaml` sotto la sezione `sensor:`.  
+   Esempio:
+
+   ```yaml
+   sensor:
+     - platform: template
+       sensors:
+         scadenza_xbox:
+           friendly_name: "Scadenza abbonamento Xbox"
+           value_template: >-
+             {% set data_scadenza = as_timestamp(strptime('2026-12-31', '%Y-%m-%d')) %}
+             {% set ora_attuale = as_timestamp(now()) %}
+             {% if ora_attuale >= data_scadenza %}
+               L'abbonamento Xbox è scaduto
+             {% else %}
+               L'abbonamento Xbox scade il 31-12-2026
+             {% endif %}
+
+         stato_abbonamento_xbox:
+           friendly_name: "Stato abbonamento Xbox"
+           value_template: >-
+             {% set data_scadenza = as_timestamp(strptime('2026-12-31', '%Y-%m-%d')) %}
+             {% if now().timestamp() >= data_scadenza %}
+               Scaduto
+             {% else %}
+               Attivo
+             {% endif %}
+   ```
+
+3. Copia il contenuto di `automations/notifica_scadenza_xbox.yaml` **dentro il tuo** `configuration.yaml` sotto la sezione `automation:`.  
+   Esempio:
+
+   ```yaml
+   automation:
+     - alias: Notifica scadenza abbonamento Xbox
+       description: Invia una notifica quando l'abbonamento Xbox scade
+       trigger:
+         - platform: state
+           entity_id: sensor.stato_abbonamento_xbox
+           to: "Scaduto"
+       action:
+         - service: notify.NOTIFICA_TUA
+           data:
+             message: "⚠️ L'abbonamento Xbox è scaduto!"
+       mode: single
+   ```
+
+   > 🔵 **IMPORTANTE:** Sostituisci `notify.NOTIFICA_TUA` con il tuo servizio di notifica, ad esempio `notify.mobile_app_mio_telefono`.
+
+4. Salva tutto e riavvia Home Assistant.
+
+---
 
 ### 📢 Suggerimento
 
-Per un'integrazione completa, aggiungi anche l'integrazione ufficiale di Xbox su Home Assistant:
+Per avere un controllo completo, aggiungi anche l'integrazione ufficiale di Xbox su Home Assistant:
 
 ➡️ [Configura Xbox Integration](https://my.home-assistant.io/redirect/config_flow_start?domain=xbox)
-
-### 📌 Requisiti
-
-- Home Assistant aggiornato
-- Servizio di notifica configurato (`notify`)
-- (Facoltativo) Integrazione Xbox Live di Home Assistant
 
 ---
 
 ## English 🇬🇧
 
-Monitor your **Xbox subscription expiration date** directly inside Home Assistant, with **automatic notifications** when it expires!
+Monitor your **Xbox subscription expiration date** directly inside Home Assistant, with **automatic notifications** when it expires!  
 Easy to use, fast, and fully customizable.
 
 ### 📄 What's Included
@@ -48,21 +90,53 @@ Easy to use, fast, and fully customizable.
 ### 🚀 How to Install
 
 1. Download the files from the ZIP package.
-2. Copy the files:
-   - `sensors/scadenza_xbox.yaml` into your sensor folder (`/config/sensors/`).
-   - `automations/notifica_scadenza_xbox.yaml` into your automations folder (`/config/automations/`).
-3. Add the files into your `configuration.yaml` using `!include`.
-4. Restart Home Assistant.
+2. Copy the content of `sensors/scadenza_xbox.yaml` **inside your** `configuration.yaml` under the `sensor:` section.  
+   Example:
 
-### 📢 Tip
+   ```yaml
+   sensor:
+     - platform: template
+       sensors:
+         scadenza_xbox:
+           friendly_name: "Scadenza abbonamento Xbox"
+           value_template: >-
+             {% set data_scadenza = as_timestamp(strptime('2026-12-31', '%Y-%m-%d')) %}
+             {% set ora_attuale = as_timestamp(now()) %}
+             {% if ora_attuale >= data_scadenza %}
+               L'abbonamento Xbox è scaduto
+             {% else %}
+               L'abbonamento Xbox scade il 31-12-2026
+             {% endif %}
 
-For a complete experience, integrate your Xbox account into Home Assistant with the official Xbox integration:
+         stato_abbonamento_xbox:
+           friendly_name: "Stato abbonamento Xbox"
+           value_template: >-
+             {% set data_scadenza = as_timestamp(strptime('2026-12-31', '%Y-%m-%d')) %}
+             {% if now().timestamp() >= data_scadenza %}
+               Scaduto
+             {% else %}
+               Attivo
+             {% endif %}
+   ```
 
-➡️ [Set up Xbox Integration](https://my.home-assistant.io/redirect/config_flow_start?domain=xbox)
+3. Copy the content of `automations/notifica_scadenza_xbox.yaml` **inside your** `configuration.yaml` under the `automation:` section.  
+   Example:
 
-### 📌 Requirements
+   ```yaml
+   automation:
+     - alias: Xbox Subscription Expiration Notification
+       description: Sends a notification when the Xbox subscription expires
+       trigger:
+         - platform: state
+           entity_id: sensor.stato_abbonamento_xbox
+           to: "Scaduto"
+       action:
+         - service: notify.YOUR_NOTIFICATION_SERVICE
+           data:
+             message: "⚠️ Your Xbox subscription has expired!"
+       mode: single
+   ```
 
-- Updated Home Assistant
-- Configured notification service (`notify`)
-- (Optional) Home Assistant Xbox Live Integration
+   > 🔵 **IMPORTANT:** Replace `notify.YOUR_NOTIFICATION_SERVICE` with your actual notification service, like `notify.mobile_app_my_phone`.
 
+4. Save and restart Home Assistant.
